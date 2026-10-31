@@ -7,7 +7,22 @@ del sitio web (frontend + backend) para Carpe Eventos.
 
 ```
 Proyecto/
-├── Frontend/                          # Vacía por ahora — acá irá el desarrollo del frontend
+├── Frontend/                          # Interfaz en React + Vite, conectada a la API
+│   ├── package.json
+│   ├── README.md                      # instrucciones, estructura y decisiones de diseño
+│   ├── index.html
+│   ├── public/                        # favicon
+│   └── src/
+│       ├── App.jsx                    # rutas y proveedores globales
+│       ├── main.jsx                   # punto de entrada
+│       ├── assets/                    # íconos SVG y fotos del salón
+│       ├── components/                # componentes reutilizables (layout, ui, home, eventos...)
+│       ├── context/                   # sistema de notificaciones
+│       ├── hooks/                     # lógica reutilizable (carga de datos, foco, etc.)
+│       ├── pages/                     # una pantalla por archivo
+│       ├── services/                  # comunicación con la API (único lugar con fetch)
+│       ├── styles/                    # variables de diseño y estilos globales
+│       └── utils/                     # formateo, validaciones, estados y constantes
 │
 ├── Backend/                           # API en Node.js/Express, arquitectura MVC
 │   ├── package.json
@@ -63,3 +78,22 @@ npm start
 
 Ver `Backend/README.md` para el detalle completo de endpoints, reglas de
 negocio implementadas y ejemplos de uso con `curl`.
+
+## Frontend — React + Vite
+
+Interfaz que respeta el boceto de la landing (identidad visual y wireframe
+de la Entrega 1) y agrega el panel de gestión de eventos: listado con
+filtros, alta, edición, cambios de estado y eliminación con confirmación,
+todo contra la API del backend.
+
+Para correrlo (con el backend ya levantado en el puerto 3000):
+
+```bash
+cd Frontend
+npm install
+npm run dev        # http://localhost:5173
+```
+
+Ver `Frontend/README.md` para la estructura de carpetas, el consumo de la
+API, el manejo de errores y notificaciones, y las decisiones de
+accesibilidad.

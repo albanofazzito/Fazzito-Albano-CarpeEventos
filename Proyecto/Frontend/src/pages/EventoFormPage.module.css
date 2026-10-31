@@ -1,0 +1,5 @@
+/* Compartido por NuevoEventoPage y EditarEventoPage. */
+.contenido {
+  max-width: 56rem;
+  padding-block: var(--space-6) var(--space-8);
+}

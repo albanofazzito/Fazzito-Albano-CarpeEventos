@@ -1,0 +1,42 @@
+.bloque {
+  display: block;
+  flex-shrink: 0;
+  width: 4.75rem;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-borgona);
+  text-align: center;
+}
+
+.partes {
+  display: flex;
+  flex-direction: column;
+}
+
+.diaSemana {
+  padding: 0.2rem 0;
+  background-color: var(--color-borgona);
+  color: var(--color-crema);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.dia {
+  padding-top: 0.25rem;
+  font-family: var(--font-titulos);
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--color-borgona);
+}
+
+.mes {
+  padding-bottom: 0.35rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}

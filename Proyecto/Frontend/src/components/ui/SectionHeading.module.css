@@ -1,0 +1,72 @@
+.heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+
+.center {
+  align-items: center;
+  text-align: center;
+}
+
+.start {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-borgona);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  color: var(--color-borgona);
+}
+
+.subtitle {
+  max-width: 40rem;
+  font-size: var(--text-lg);
+  color: var(--color-texto-suave);
+}
+
+/* Filete dorado con un rombo al centro, como en una tarjeta de invitación. */
+.rule {
+  position: relative;
+  width: 5.5rem;
+  height: 1px;
+  margin-top: var(--space-3);
+  background-color: var(--color-dorado);
+}
+
+.rule::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 7px;
+  background-color: var(--color-dorado);
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.start .rule::after {
+  left: 0;
+  transform: translate(0, -50%) rotate(45deg);
+}
+
+:global(.surface-dark) .eyebrow {
+  color: var(--color-dorado-claro);
+}
+
+:global(.surface-dark) .title {
+  color: var(--color-crema);
+}
+
+:global(.surface-dark) .subtitle {
+  color: var(--color-texto-invertido-suave);
+}

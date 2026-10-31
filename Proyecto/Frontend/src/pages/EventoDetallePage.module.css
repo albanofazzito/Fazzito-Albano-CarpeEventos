@@ -1,0 +1,125 @@
+.contenido {
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20rem;
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.principal,
+.lateral {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lateral {
+  position: sticky;
+  top: calc(var(--header-height) + var(--space-4));
+}
+
+.descripcionEstado {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-texto-suave);
+}
+
+.descripcionEstado strong {
+  color: var(--color-texto);
+}
+
+.datos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);
+  margin: 0;
+}
+
+.datos dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+
+.datos dd {
+  margin: var(--space-1) 0 0;
+  font-size: var(--text-lg);
+}
+
+.datoIcon {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+  color: var(--color-borgona);
+}
+
+.nota {
+  display: block;
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.clienteNombre {
+  font-family: var(--font-titulos);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-borgona);
+}
+
+.contacto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-6);
+  margin-top: var(--space-3);
+  list-style: none;
+}
+
+.contacto li {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.contacto a {
+  color: var(--color-texto);
+  text-underline-offset: 0.2em;
+}
+
+.contacto a:hover {
+  color: var(--color-borgona);
+}
+
+.whatsapp {
+  margin-top: var(--space-4);
+}
+
+.otrasAcciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .lateral {
+    position: static;
+  }
+}
+
+@media (max-width: 520px) {
+  .datos {
+    grid-template-columns: 1fr;
+  }
+}

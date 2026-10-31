@@ -1,0 +1,59 @@
+.badge {
+  --badge-texto: var(--color-texto);
+  --badge-fondo: var(--color-crema);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: var(--radius-full);
+  background-color: var(--badge-fondo);
+  color: var(--badge-texto);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.lg {
+  padding: 0.3rem 0.85rem;
+  font-size: var(--text-sm);
+}
+
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: currentColor;
+}
+
+/* Todas las combinaciones superan 4.5:1 de contraste. */
+.pendiente {
+  --badge-texto: #7a4a0e;
+  --badge-fondo: #fbebd3;
+}
+
+.presupuestado {
+  --badge-texto: #2f4672;
+  --badge-fondo: #e3e8f3;
+}
+
+.confirmado {
+  --badge-texto: #22573c;
+  --badge-fondo: #e1f0e7;
+}
+
+.en-curso {
+  --badge-texto: var(--color-borgona);
+  --badge-fondo: #f3dee6;
+}
+
+.finalizado {
+  --badge-texto: #4b4347;
+  --badge-fondo: #ece7e3;
+}
+
+.cancelado {
+  --badge-texto: #922b21;
+  --badge-fondo: #f8e0de;
+}

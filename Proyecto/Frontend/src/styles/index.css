@@ -1,0 +1,10 @@
+/* Tipografías del documento de identidad visual, servidas localmente. */
+@import "@fontsource/nunito/400.css";
+@import "@fontsource/nunito/600.css";
+@import "@fontsource/nunito/700.css";
+@import "@fontsource/playfair-display/700.css";
+@import "@fontsource/playfair-display/400-italic.css";
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./utilities.css";

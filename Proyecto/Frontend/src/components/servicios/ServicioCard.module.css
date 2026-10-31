@@ -1,0 +1,107 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition:
+    box-shadow var(--transition),
+    transform var(--transition);
+}
+
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+}
+
+/* "Cuadrado ícono/foto" del boceto. */
+.media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  background-color: var(--color-crema);
+  border-bottom: 1px solid var(--color-borde);
+}
+
+.icon {
+  width: 3.5rem;
+  height: 3.5rem;
+  color: var(--color-borgona);
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+}
+
+.categoria {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+
+.nombre {
+  font-size: var(--text-xl);
+  color: var(--color-borgona);
+}
+
+.descripcion {
+  flex: 1;
+  color: var(--color-texto-suave);
+}
+
+.precio {
+  margin-top: var(--space-2);
+  font-family: var(--font-titulos);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.desde {
+  font-family: var(--font-cuerpo);
+  font-size: var(--text-sm);
+  font-weight: 400;
+  color: var(--color-texto-suave);
+}
+
+.link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  min-height: 3rem;
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--color-borde);
+  font-weight: 700;
+  color: var(--color-borgona);
+  text-decoration: none;
+}
+
+.link:hover {
+  background-color: var(--color-borgona-100);
+}
+
+.linkIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+  transition: transform var(--transition);
+}
+
+.link:hover .linkIcon {
+  transform: translateX(3px);
+}
+
+@media (max-width: 560px) {
+  .media {
+    aspect-ratio: auto;
+    height: 7rem;
+  }
+}

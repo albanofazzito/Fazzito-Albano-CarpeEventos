@@ -1,0 +1,69 @@
+.header {
+  background-color: var(--color-borgona);
+  background-image: radial-gradient(circle at 85% -20%, rgb(212 136 42 / 0.22), transparent 55%);
+}
+
+.inner {
+  padding-block: var(--space-6) var(--space-7);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 2.25rem;
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-dorado-claro);
+  text-decoration: none;
+}
+
+.back:hover {
+  text-decoration: underline;
+}
+
+.backIcon {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  max-width: 46rem;
+}
+
+.eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-dorado-claro);
+}
+
+.title {
+  font-size: var(--text-3xl);
+  color: var(--color-crema);
+}
+
+.description {
+  font-size: var(--text-lg);
+  color: var(--color-texto-invertido-suave);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}

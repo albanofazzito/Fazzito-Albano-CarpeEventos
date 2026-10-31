@@ -1,0 +1,89 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.obligatorios {
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.fieldset {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.legend {
+  padding: 0;
+  font-weight: 700;
+}
+
+.ayuda {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.filaTres {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  align-items: start;
+  gap: var(--space-5);
+}
+
+.nota {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-left: 3px solid var(--color-dorado);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-crema-50);
+  color: var(--color-texto-suave);
+}
+
+.notaIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  margin-top: 0.15rem;
+  color: var(--color-borgona);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-borde);
+}
+
+@media (max-width: 720px) {
+  .form {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .fila,
+  .filaTres {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones > * {
+    flex: 1 1 100%;
+  }
+}

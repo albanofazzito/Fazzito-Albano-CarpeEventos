@@ -1,0 +1,56 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 34rem;
+  margin: var(--space-6) auto;
+  padding: var(--space-6) var(--space-5);
+  text-align: center;
+  background-color: var(--color-superficie);
+  border: 1px dashed var(--color-crema-300);
+  border-radius: var(--radius-md);
+}
+
+.iconWrapper {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin-bottom: var(--space-4);
+  border-radius: 50%;
+  background-color: var(--color-crema);
+  color: var(--color-borgona);
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.error {
+  border-style: solid;
+  border-color: #f0c5bf;
+}
+
+.error .iconWrapper {
+  background-color: var(--color-error-fondo);
+  color: var(--color-error);
+}
+
+.title {
+  font-size: var(--text-xl);
+  color: var(--color-borgona);
+}
+
+.description {
+  margin-top: var(--space-2);
+  color: var(--color-texto-suave);
+}
+
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+}

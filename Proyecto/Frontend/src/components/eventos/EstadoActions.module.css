@@ -1,0 +1,16 @@
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+}
+
+.ayuda {
+  margin-top: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.vacio {
+  color: var(--color-texto-suave);
+}

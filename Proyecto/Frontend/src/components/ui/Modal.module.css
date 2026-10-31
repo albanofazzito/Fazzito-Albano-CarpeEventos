@@ -1,0 +1,65 @@
+.dialog {
+  width: min(30rem, calc(100vw - 2rem));
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  background-color: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: var(--shadow-lg);
+}
+
+.dialog[open] {
+  animation: aparecer 180ms ease-out;
+}
+
+.dialog::backdrop {
+  background-color: rgb(43 15 28 / 0.6);
+}
+
+.content {
+  padding: var(--space-6);
+}
+
+.icon {
+  margin-bottom: var(--space-4);
+}
+
+.title {
+  font-size: var(--text-xl);
+  color: var(--color-borgona);
+}
+
+.description {
+  margin-top: var(--space-3);
+  color: var(--color-texto-suave);
+}
+
+.body {
+  margin-top: var(--space-3);
+  color: var(--color-texto-suave);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+@media (max-width: 480px) {
+  .footer > * {
+    flex: 1 1 100%;
+  }
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
