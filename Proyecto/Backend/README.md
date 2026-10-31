@@ -20,6 +20,11 @@ npm start          # o "npm run dev" para reiniciar automáticamente con --watch
 El servidor levanta en `http://localhost:3000` (configurable con la
 variable de entorno `PORT`).
 
+La API habilita **CORS** para el frontend (`http://localhost:5173` en
+desarrollo y `http://localhost:4173` en `vite preview`). Si el frontend corre
+en otro origen, se puede indicar con la variable `CORS_ORIGIN` (varios
+orígenes separados por coma).
+
 ## Estructura de carpetas (`src/`)
 
 ```
