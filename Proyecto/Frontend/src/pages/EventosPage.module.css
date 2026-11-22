@@ -10,8 +10,21 @@
   gap: var(--space-4) var(--space-6);
 }
 
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.periodo {
+  width: 11rem;
+}
+
+/* Ancho fijo (no un porcentaje): dentro de un contenedor flex que se acomoda
+   solo, un porcentaje hace que los dos campos terminen uno debajo del otro. */
 .busqueda {
-  width: min(100%, 18rem);
+  width: 16rem;
+  max-width: 100%;
 }
 
 .resumen {
@@ -26,4 +39,12 @@
   flex-direction: column;
   gap: var(--space-3);
   list-style: none;
+}
+
+@media (max-width: 560px) {
+  .filtros,
+  .periodo,
+  .busqueda {
+    width: 100%;
+  }
 }

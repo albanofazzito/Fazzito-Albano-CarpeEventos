@@ -6,7 +6,10 @@ import { paths, SECCIONES } from "../../utils/routes.js";
 import Button from "../ui/Button.jsx";
 import styles from "./Hero.module.css";
 
-/** Sección 2 del boceto: foto de fondo, título principal y CTA "Consultá tu fecha". */
+/**
+ * Sección 2 del boceto: foto de fondo, título principal y CTA "Consultá tu
+ * fecha". Se suma un acceso secundario al calendario de fechas libres.
+ */
 export default function Hero() {
   return (
     <section
@@ -28,9 +31,14 @@ export default function Hero() {
           <p className={styles.subtitle}>
             Desde cumpleaños hasta bodas, todo en un solo lugar: salón, catering, animación, DJ y decoración.
           </p>
-          <Button to={paths.nuevoEvento()} size="lg" icon={CalendarIcon} className={styles.cta}>
-            Consultá tu fecha
-          </Button>
+          <div className={styles.acciones}>
+            <Button to={paths.nuevoEvento()} size="lg" icon={CalendarIcon}>
+              Consultá tu fecha
+            </Button>
+            <Button to={paths.disponibilidad} size="lg" variant="outline">
+              Ver fechas libres
+            </Button>
+          </div>
         </div>
       </div>
     </section>

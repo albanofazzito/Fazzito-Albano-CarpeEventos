@@ -1,0 +1,51 @@
+.caja {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-md);
+  background-color: var(--color-crema-50);
+}
+
+.titulo {
+  font-family: var(--font-cuerpo);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-texto-suave);
+}
+
+.total {
+  margin-top: var(--space-1);
+  font-family: var(--font-titulos);
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--color-borgona);
+}
+
+.calculando {
+  margin-top: var(--space-2);
+  color: var(--color-texto-suave);
+}
+
+.detalle {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-borde);
+  font-size: var(--text-sm);
+  list-style: none;
+}
+
+.detalle li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.nota {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}

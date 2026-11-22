@@ -1,0 +1,55 @@
+.caja {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-borde);
+  border-left-width: 4px;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-crema-50);
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.libre {
+  border-left-color: var(--color-exito);
+  background-color: var(--color-exito-fondo);
+}
+
+.parcial {
+  border-left-color: var(--color-dorado);
+}
+
+.ocupado {
+  border-left-color: var(--color-error);
+  background-color: var(--color-error-fondo);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-weight: 700;
+  color: var(--color-texto);
+}
+
+.icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.libre .icon {
+  color: var(--color-exito);
+}
+
+.franjas {
+  margin: var(--space-2) 0 0 var(--space-6);
+}
+
+.nota {
+  margin-top: var(--space-2);
+}
+
+.ocupado .nota {
+  font-weight: 700;
+  color: var(--color-error);
+}

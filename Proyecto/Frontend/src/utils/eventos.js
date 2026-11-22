@@ -1,17 +1,6 @@
+import { getMonthOf, getTodayISO } from "./dates.js";
 import { formatNombreCompleto } from "./formatters.js";
 import { LISTA_ESTADOS } from "./estados.js";
-
-/** La API devuelve solo clienteId y servicioId: acá se agregan los objetos completos. */
-export function enrichEventos(eventos, clientes, servicios) {
-  const clientesPorId = new Map(clientes.map((cliente) => [cliente.id, cliente]));
-  const serviciosPorId = new Map(servicios.map((servicio) => [servicio.id, servicio]));
-
-  return eventos.map((evento) => ({
-    ...evento,
-    cliente: clientesPorId.get(evento.clienteId) ?? null,
-    servicio: serviciosPorId.get(evento.servicioId) ?? null,
-  }));
-}
 
 export function sortByFecha(eventos) {
   return [...eventos].sort((a, b) =>
@@ -20,15 +9,32 @@ export function sortByFecha(eventos) {
 }
 
 /** Minúsculas y sin tildes, para que "lucia" encuentre a "Lucía". */
-function normalizar(texto) {
+export function normalizar(texto) {
   return texto.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase().trim();
 }
 
-export function filterEventos(eventos, { estado, busqueda = "" }) {
+/** Períodos del filtro de fechas del panel. */
+export const PERIODOS = Object.freeze({
+  TODOS: "",
+  PROXIMOS: "proximos",
+  ESTE_MES: "este-mes",
+  PASADOS: "pasados",
+});
+
+function estaEnPeriodo(fecha, periodo) {
+  const hoy = getTodayISO();
+  if (periodo === PERIODOS.PROXIMOS) return fecha >= hoy;
+  if (periodo === PERIODOS.PASADOS) return fecha < hoy;
+  if (periodo === PERIODOS.ESTE_MES) return getMonthOf(fecha) === getMonthOf(hoy);
+  return true;
+}
+
+export function filterEventos(eventos, { estado, periodo = PERIODOS.TODOS, busqueda = "" }) {
   const termino = normalizar(busqueda);
 
   return eventos.filter((evento) => {
     if (estado && evento.estado !== estado) return false;
+    if (!estaEnPeriodo(evento.fecha, periodo)) return false;
     if (!termino) return true;
 
     const texto = `${formatNombreCompleto(evento.cliente)} ${evento.servicio?.nombre ?? ""}`;
@@ -65,9 +71,10 @@ export function eventoToFormValues(evento) {
   };
 }
 
-export function formValuesToPayload(values) {
+/** clienteId solo se envía cuando el formulario lo pide (lo elige el administrador). */
+export function formValuesToPayload(values, { incluirCliente = false } = {}) {
   return {
-    clienteId: Number(values.clienteId),
+    ...(incluirCliente && { clienteId: Number(values.clienteId) }),
     servicioId: Number(values.servicioId),
     fecha: values.fecha,
     horaInicio: values.horaInicio,

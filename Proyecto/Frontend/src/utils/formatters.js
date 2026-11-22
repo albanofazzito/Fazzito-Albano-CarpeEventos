@@ -8,6 +8,8 @@ const fechaLargaFormatter = new Intl.DateTimeFormat(LOCALE, {
   month: "long",
   year: "numeric",
 });
+const fechaCortaFormatter = new Intl.DateTimeFormat(LOCALE, { day: "numeric", month: "long", year: "numeric" });
+const mesAnioFormatter = new Intl.DateTimeFormat(LOCALE, { month: "long", year: "numeric" });
 const mesCortoFormatter = new Intl.DateTimeFormat(LOCALE, { month: "short" });
 const diaSemanaCortoFormatter = new Intl.DateTimeFormat(LOCALE, { weekday: "short" });
 const precioFormatter = new Intl.NumberFormat(LOCALE, {
@@ -23,6 +25,18 @@ const sinPunto = (texto) => texto.replace(/\.$/, "");
 export function formatFechaLarga(fechaISO) {
   const fecha = parseISODate(fechaISO);
   return fecha ? capitalize(fechaLargaFormatter.format(fecha)) : fechaISO;
+}
+
+/** "2026-11-14" -> "14 de noviembre de 2026" */
+export function formatFechaCorta(fechaISO) {
+  const fecha = parseISODate(fechaISO);
+  return fecha ? fechaCortaFormatter.format(fecha) : fechaISO;
+}
+
+/** "2026-12" -> "Diciembre de 2026" */
+export function formatMes(mes) {
+  const fecha = parseISODate(`${mes}-01`);
+  return fecha ? capitalize(mesAnioFormatter.format(fecha)) : mes;
 }
 
 /** "2026-11-14" -> { dia: "14", mes: "nov", diaSemana: "sáb" } (para el bloque de fecha). */
@@ -50,5 +64,5 @@ export function formatInvitados(cantidad) {
 }
 
 export function formatNombreCompleto(cliente) {
-  return cliente ? `${cliente.nombre} ${cliente.apellido}` : "Cliente sin datos";
+  return cliente ? `${cliente.nombre} ${cliente.apellido}`.trim() : "Cliente sin datos";
 }

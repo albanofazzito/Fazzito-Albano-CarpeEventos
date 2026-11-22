@@ -26,7 +26,7 @@ export default function ServicioCard({ servicio }) {
           <span className={styles.desde}>Desde</span> {formatPrecio(servicio.precio)}
         </p>
       </div>
-      <Link to={paths.nuevoEvento(servicio.id)} className={styles.link}>
+      <Link to={paths.nuevoEvento({ servicio: servicio.id })} className={styles.link}>
         Consultar fecha
         <span className="visually-hidden"> para {servicio.nombre}</span>
         <ArrowRightIcon className={styles.linkIcon} />

@@ -5,35 +5,43 @@ import RefreshIcon from "../assets/icons/refresh.svg?react";
 import EliminarEventoDialog from "../components/eventos/EliminarEventoDialog.jsx";
 import EstadoFilter from "../components/eventos/EstadoFilter.jsx";
 import EventoCard from "../components/eventos/EventoCard.jsx";
+import ResumenAtencion from "../components/eventos/ResumenAtencion.jsx";
 import PageHeader from "../components/layout/PageHeader.jsx";
 import Button from "../components/ui/Button.jsx";
 import Loader from "../components/ui/Loader.jsx";
+import SelectField from "../components/ui/SelectField.jsx";
 import StatusMessage from "../components/ui/StatusMessage.jsx";
 import TextField from "../components/ui/TextField.jsx";
 import { useAsync } from "../hooks/useAsync.js";
+import { useAuth } from "../hooks/useAuth.js";
 import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
 import { useEliminarEvento } from "../hooks/useEliminarEvento.js";
-import { getClientes } from "../services/cliente.service.js";
 import { getEventos } from "../services/evento.service.js";
-import { getServicios } from "../services/servicio.service.js";
 import { cx } from "../utils/classNames.js";
 import { LISTA_ESTADOS } from "../utils/estados.js";
-import { countByEstado, enrichEventos, filterEventos, sortByFecha } from "../utils/eventos.js";
+import { countByEstado, filterEventos, PERIODOS, sortByFecha } from "../utils/eventos.js";
 import { paths } from "../utils/routes.js";
 import styles from "./EventosPage.module.css";
 
-async function cargarEventos() {
-  const [eventos, clientes, servicios] = await Promise.all([getEventos(), getClientes(), getServicios()]);
-  return enrichEventos(eventos, clientes, servicios);
-}
+const OPCIONES_PERIODO = [
+  { value: PERIODOS.TODOS, label: "Todas las fechas" },
+  { value: PERIODOS.PROXIMOS, label: "Próximos" },
+  { value: PERIODOS.ESTE_MES, label: "Este mes" },
+  { value: PERIODOS.PASADOS, label: "Pasados" },
+];
 
-/** Panel de gestión: listado de eventos con filtro por estado y búsqueda. */
+/**
+ * Listado de eventos. El administrador ve el panel de gestión con todas las
+ * reservas; un cliente ve "Mis eventos" (la API ya devuelve solo los suyos).
+ */
 export default function EventosPage() {
-  useDocumentTitle("Eventos");
+  const { esAdmin } = useAuth();
+  useDocumentTitle(esAdmin ? "Eventos" : "Mis eventos");
 
-  const { data: eventos, loading, error, reload, setData } = useAsync(cargarEventos);
+  const { data: eventos, loading, error, reload, setData } = useAsync(getEventos);
   const [searchParams, setSearchParams] = useSearchParams();
   const [busqueda, setBusqueda] = useState("");
+  const [periodo, setPeriodo] = useState(PERIODOS.TODOS);
 
   // El filtro de estado vive en la URL (?estado=Confirmado) para poder compartirlo o volver atrás.
   const estadoParam = searchParams.get("estado");
@@ -45,8 +53,8 @@ export default function EventosPage() {
 
   const conteo = useMemo(() => countByEstado(eventos ?? []), [eventos]);
   const visibles = useMemo(
-    () => sortByFecha(filterEventos(eventos ?? [], { estado: estadoFiltro, busqueda })),
-    [eventos, estadoFiltro, busqueda]
+    () => sortByFecha(filterEventos(eventos ?? [], { estado: estadoFiltro, periodo, busqueda })),
+    [eventos, estadoFiltro, periodo, busqueda]
   );
 
   function cambiarEstadoFiltro(estado) {
@@ -55,20 +63,27 @@ export default function EventosPage() {
 
   function limpiarFiltros() {
     setBusqueda("");
+    setPeriodo(PERIODOS.TODOS);
     cambiarEstadoFiltro("");
   }
+
+  const botonNuevo = (
+    <Button to={paths.nuevoEvento()} icon={PlusIcon}>
+      {esAdmin ? "Nuevo evento" : "Pedir una fecha"}
+    </Button>
+  );
 
   return (
     <>
       <PageHeader
-        eyebrow="Panel de gestión"
-        title="Eventos"
-        description="Seguí cada reserva del salón, desde la primera consulta hasta el día de la fiesta."
-        actions={
-          <Button to={paths.nuevoEvento()} icon={PlusIcon}>
-            Nuevo evento
-          </Button>
+        eyebrow={esAdmin ? "Panel de gestión" : "Tu cuenta"}
+        title={esAdmin ? "Eventos" : "Mis eventos"}
+        description={
+          esAdmin
+            ? "Seguí cada reserva del salón, desde la primera consulta hasta el día de la fiesta."
+            : "Tus reservas en Carpe Eventos: las próximas y las que ya celebraste."
         }
+        actions={botonNuevo}
       />
 
       <div className={cx("container", styles.contenido)}>
@@ -91,29 +106,38 @@ export default function EventosPage() {
         {eventos?.length === 0 && (
           <StatusMessage
             tone="empty"
-            title="Todavía no hay eventos cargados"
-            action={
-              <Button to={paths.nuevoEvento()} icon={PlusIcon}>
-                Registrar el primero
-              </Button>
-            }
+            title={esAdmin ? "Todavía no hay eventos cargados" : "Todavía no pediste ninguna fecha"}
+            action={botonNuevo}
           >
-            Cuando registres una reserva, la vas a ver acá junto con su estado.
+            {esAdmin
+              ? "Cuando se registre una reserva, la vas a ver acá junto con su estado."
+              : "Elegí el tipo de evento, la fecha y la cantidad de invitados, y te enviamos el presupuesto."}
           </StatusMessage>
         )}
 
         {eventos?.length > 0 && (
           <>
+            <ResumenAtencion eventos={eventos} esAdmin={esAdmin} onFiltrar={cambiarEstadoFiltro} />
+
             <div className={styles.toolbar}>
               <EstadoFilter value={estadoFiltro} onChange={cambiarEstadoFiltro} conteo={conteo} total={eventos.length} />
-              <TextField
-                label="Buscar"
-                type="search"
-                placeholder="Cliente o tipo de evento"
-                value={busqueda}
-                onChange={(event) => setBusqueda(event.target.value)}
-                className={styles.busqueda}
-              />
+              <div className={styles.filtros}>
+                <SelectField
+                  label="Fecha"
+                  value={periodo}
+                  onChange={(event) => setPeriodo(event.target.value)}
+                  options={OPCIONES_PERIODO}
+                  className={styles.periodo}
+                />
+                <TextField
+                  label="Buscar"
+                  type="search"
+                  placeholder={esAdmin ? "Cliente o tipo de evento" : "Tipo de evento"}
+                  value={busqueda}
+                  onChange={(event) => setBusqueda(event.target.value)}
+                  className={styles.busqueda}
+                />
+              </div>
             </div>
 
             <p className={styles.resumen} aria-live="polite">
@@ -126,7 +150,11 @@ export default function EventosPage() {
               <ul className={styles.lista}>
                 {visibles.map((evento) => (
                   <li key={evento.id}>
-                    <EventoCard evento={evento} onEliminar={eliminacion.solicitar} />
+                    <EventoCard
+                      evento={evento}
+                      mostrarCliente={esAdmin}
+                      onEliminar={esAdmin ? eliminacion.solicitar : undefined}
+                    />
                   </li>
                 ))}
               </ul>
@@ -140,7 +168,7 @@ export default function EventosPage() {
                   </Button>
                 }
               >
-                Probá con otro estado o con otra búsqueda.
+                Probá con otro estado, otra fecha o con otra búsqueda.
               </StatusMessage>
             )}
           </>

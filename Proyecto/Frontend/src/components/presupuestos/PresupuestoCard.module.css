@@ -1,0 +1,61 @@
+.vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  color: var(--color-texto-suave);
+}
+
+.emision {
+  margin-bottom: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.respuesta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-borde);
+  color: var(--color-texto-suave);
+}
+
+.respuesta:empty {
+  display: none;
+}
+
+.botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.imprimir {
+  margin-top: var(--space-4);
+}
+
+.soloImpresion {
+  display: none;
+}
+
+@media print {
+  .soloImpresion {
+    display: block;
+    margin-bottom: var(--space-5);
+  }
+
+  .impresionMarca {
+    font-family: var(--font-titulos);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    color: var(--color-borgona);
+  }
+
+  .botones,
+  .imprimir {
+    display: none;
+  }
+}

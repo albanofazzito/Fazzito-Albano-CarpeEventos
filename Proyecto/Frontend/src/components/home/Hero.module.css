@@ -66,7 +66,10 @@
   color: var(--color-texto-invertido-suave);
 }
 
-.cta {
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
   margin-top: var(--space-6);
 }
 

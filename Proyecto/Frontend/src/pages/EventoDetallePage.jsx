@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react";
-import { useNavigate, useParams } from "react-router";
+import { Link, useNavigate, useParams } from "react-router";
 import CalendarIcon from "../assets/icons/calendar.svg?react";
 import ClockIcon from "../assets/icons/clock.svg?react";
 import EditIcon from "../assets/icons/edit.svg?react";
@@ -15,20 +15,28 @@ import EstadoActions from "../components/eventos/EstadoActions.jsx";
 import EstadoBadge from "../components/eventos/EstadoBadge.jsx";
 import EstadoTimeline from "../components/eventos/EstadoTimeline.jsx";
 import PageHeader from "../components/layout/PageHeader.jsx";
+import PresupuestoCard from "../components/presupuestos/PresupuestoCard.jsx";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import ConfirmDialog from "../components/ui/ConfirmDialog.jsx";
 import Loader from "../components/ui/Loader.jsx";
 import StatusMessage from "../components/ui/StatusMessage.jsx";
 import { useAsync } from "../hooks/useAsync.js";
+import { useAuth } from "../hooks/useAuth.js";
 import { useDocumentTitle } from "../hooks/useDocumentTitle.js";
 import { useEliminarEvento } from "../hooks/useEliminarEvento.js";
 import { useToast } from "../hooks/useToast.js";
-import { getClienteById } from "../services/cliente.service.js";
 import { cambiarEstadoEvento, getEventoById } from "../services/evento.service.js";
-import { getServicioById } from "../services/servicio.service.js";
+import { aprobarPresupuesto, generarPresupuesto, rechazarPresupuesto } from "../services/presupuesto.service.js";
 import { cx } from "../utils/classNames.js";
-import { DESCRIPCION_ESTADO, ESTADOS, puedeEditarse, puedeEliminarse } from "../utils/estados.js";
+import { MENSAJE_WHATSAPP_CONSULTA, NEGOCIO } from "../utils/constants.js";
+import {
+  DESCRIPCION_ESTADO,
+  ESTADOS,
+  getAccionesDeEstado,
+  puedeEditarse,
+  puedeEliminarse,
+} from "../utils/estados.js";
 import {
   formatFechaLarga,
   formatHorario,
@@ -40,34 +48,40 @@ import { buildTelUrl, buildWhatsAppUrl } from "../utils/links.js";
 import { paths } from "../utils/routes.js";
 import styles from "./EventoDetallePage.module.css";
 
-/** Detalle de un evento: datos, cliente, seguimiento del estado y acciones. */
+const MENSAJE_EXITO_ESTADO = {
+  [ESTADOS.CONFIRMADO]: "La fecha quedó reservada para este evento.",
+  [ESTADOS.EN_CURSO]: "¡Que empiece la fiesta!",
+  [ESTADOS.FINALIZADO]: "El evento quedó guardado en el historial.",
+  [ESTADOS.CANCELADO]: "La fecha quedó libre para otras reservas.",
+};
+
+/**
+ * Detalle de un evento: seguimiento del estado, presupuesto, datos de la
+ * reserva y las acciones que permite el rol del usuario.
+ */
 export default function EventoDetallePage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const toast = useToast();
+  const { usuario, esAdmin } = useAuth();
 
-  const cargarDetalle = useCallback(async () => {
-    const evento = await getEventoById(id);
-    const [cliente, servicio] = await Promise.all([
-      getClienteById(evento.clienteId),
-      getServicioById(evento.servicioId),
-    ]);
-    return { evento, cliente, servicio };
-  }, [id]);
+  const cargarDetalle = useCallback(() => getEventoById(id), [id]);
+  const { data: evento, loading, error, reload, setData } = useAsync(cargarDetalle);
 
-  const { data, loading, error, reload, setData } = useAsync(cargarDetalle);
   const [estadoEnProceso, setEstadoEnProceso] = useState(null);
+  const [accionPresupuesto, setAccionPresupuesto] = useState(null);
   const [confirmarCancelacion, setConfirmarCancelacion] = useState(false);
+  const [confirmarRechazo, setConfirmarRechazo] = useState(false);
   const eliminacion = useEliminarEvento(() => navigate(paths.eventos));
 
-  useDocumentTitle(data ? `${data.servicio.nombre} · ${formatFechaLarga(data.evento.fecha)}` : "Detalle del evento");
+  useDocumentTitle(evento ? `${evento.servicio?.nombre} · ${formatFechaLarga(evento.fecha)}` : "Detalle del evento");
 
   async function aplicarCambioEstado(destino) {
     setEstadoEnProceso(destino);
     try {
-      const actualizado = await cambiarEstadoEvento(data.evento.id, destino);
-      setData((actual) => ({ ...actual, evento: actualizado }));
-      toast.success("Estado actualizado", `El evento ahora está ${destino.toLowerCase()}.`);
+      const actualizado = await cambiarEstadoEvento(evento.id, destino);
+      setData(actualizado);
+      toast.success(`Evento ${destino.toLowerCase()}`, MENSAJE_EXITO_ESTADO[destino]);
     } catch (err) {
       toast.error("No se pudo cambiar el estado", err.message);
     } finally {
@@ -85,8 +99,66 @@ export default function EventoDetallePage() {
     }
   }
 
+  /**
+   * Generar, aprobar o rechazar el presupuesto también cambia el estado del
+   * evento, así que después se vuelve a pedir el detalle completo a la API.
+   */
+  async function operarPresupuesto(tipo, operacion, exito, tituloError) {
+    setAccionPresupuesto(tipo);
+    try {
+      await operacion();
+    } catch (err) {
+      toast.error(tituloError, err.message);
+      setAccionPresupuesto(null);
+      setConfirmarRechazo(false);
+      return;
+    }
+
+    toast.success(...exito);
+    try {
+      setData(await getEventoById(id));
+    } catch {
+      reload();
+    } finally {
+      setAccionPresupuesto(null);
+      setConfirmarRechazo(false);
+    }
+  }
+
+  const generar = () =>
+    operarPresupuesto(
+      "generar",
+      () => generarPresupuesto(evento.id),
+      ["Presupuesto generado", "El evento pasó a Presupuestado. Avisale al cliente para que lo revise."],
+      "No se pudo generar el presupuesto"
+    );
+
+  const aprobar = () =>
+    operarPresupuesto(
+      "aprobar",
+      () => aprobarPresupuesto(evento.presupuesto.id),
+      esAdmin
+        ? ["Aprobación registrada", "Ya podés confirmar el evento."]
+        : ["¡Presupuesto aprobado!", "Ahora el salón confirma tu fecha. Te avisamos por WhatsApp."],
+      "No se pudo aprobar el presupuesto"
+    );
+
+  const rechazar = () =>
+    operarPresupuesto(
+      "rechazar",
+      () => rechazarPresupuesto(evento.presupuesto.id),
+      ["Presupuesto rechazado", "La reserva volvió a Pendiente: se puede modificar y volver a cotizar."],
+      "No se pudo rechazar el presupuesto"
+    );
+
   if (loading || error) {
-    const noExiste = error?.status === 404;
+    let titulo = "No pudimos cargar el evento";
+    let detalle = error?.message;
+    if (error?.status === 404) {
+      titulo = "No encontramos este evento";
+      detalle = "Puede que se haya eliminado o que el enlace sea incorrecto.";
+    }
+    if (error?.status === 403) titulo = "No tenés acceso a este evento";
 
     return (
       <>
@@ -96,13 +168,13 @@ export default function EventoDetallePage() {
           {error && (
             <StatusMessage
               tone="error"
-              title={noExiste ? "No encontramos este evento" : "No pudimos cargar el evento"}
+              title={titulo}
               action={
                 <>
                   <Button to={paths.eventos} variant="outline">
                     Ir al listado
                   </Button>
-                  {!noExiste && (
+                  {error.status !== 404 && error.status !== 403 && (
                     <Button icon={RefreshIcon} onClick={reload}>
                       Reintentar
                     </Button>
@@ -110,7 +182,7 @@ export default function EventoDetallePage() {
                 </>
               }
             >
-              {noExiste ? "Puede que se haya eliminado o que el enlace sea incorrecto." : error.message}
+              {detalle}
             </StatusMessage>
           )}
         </div>
@@ -118,17 +190,17 @@ export default function EventoDetallePage() {
     );
   }
 
-  const { evento, cliente, servicio } = data;
+  const { cliente, servicio, presupuesto } = evento;
   const nombreCliente = formatNombreCompleto(cliente);
-  const eventoCompleto = { ...evento, cliente, servicio };
+  const acciones = getAccionesDeEstado(evento, usuario.rol);
 
   return (
     <>
       <PageHeader
         backTo={paths.eventos}
-        backLabel="Volver a eventos"
+        backLabel={esAdmin ? "Volver a eventos" : "Volver a mis eventos"}
         eyebrow={`Evento n.º ${evento.id}`}
-        title={servicio.nombre}
+        title={servicio?.nombre ?? "Evento"}
         description={`${formatFechaLarga(evento.fecha)} · ${nombreCliente}`}
       >
         <EstadoBadge estado={evento.estado} size="lg" />
@@ -142,6 +214,15 @@ export default function EventoDetallePage() {
               <strong>{evento.estado}:</strong> {DESCRIPCION_ESTADO[evento.estado]}
             </p>
           </Card>
+
+          <PresupuestoCard
+            evento={evento}
+            esAdmin={esAdmin}
+            accion={accionPresupuesto}
+            onGenerar={generar}
+            onAprobar={aprobar}
+            onRechazar={() => setConfirmarRechazo(true)}
+          />
 
           <Card title="Datos del evento">
             <dl className={styles.datos}>
@@ -169,46 +250,81 @@ export default function EventoDetallePage() {
               <div>
                 <dt>
                   <TagIcon className={styles.datoIcon} />
-                  Precio de referencia
+                  {presupuesto ? "Presupuesto" : "Precio de referencia"}
                 </dt>
                 <dd>
-                  Desde {formatPrecio(servicio.precio)}
-                  <span className={styles.nota}>El monto final se define en el presupuesto.</span>
+                  {presupuesto ? (
+                    <>
+                      {formatPrecio(presupuesto.montoTotal)}
+                      <span className={styles.nota}>Estado del presupuesto: {presupuesto.estado}</span>
+                    </>
+                  ) : (
+                    <>
+                      Desde {formatPrecio(servicio?.precio ?? 0)}
+                      <span className={styles.nota}>El monto final se calcula en el presupuesto.</span>
+                    </>
+                  )}
                 </dd>
               </div>
             </dl>
           </Card>
 
-          <Card title="Cliente">
-            <p className={styles.clienteNombre}>{nombreCliente}</p>
-            <ul className={styles.contacto}>
-              <li>
-                <PhoneIcon className={styles.datoIcon} />
-                <span className="visually-hidden">Teléfono: </span>
-                <a href={buildTelUrl(cliente.telefono)}>{cliente.telefono}</a>
-              </li>
-              <li>
-                <MailIcon className={styles.datoIcon} />
-                <span className="visually-hidden">Email: </span>
-                <a href={`mailto:${cliente.email}`}>{cliente.email}</a>
-              </li>
-            </ul>
-            <Button
-              href={buildWhatsAppUrl(cliente.telefono, `¡Hola, ${cliente.nombre}! Te escribimos de Carpe Eventos por tu reserva.`)}
-              external
-              variant="outline"
-              size="sm"
-              icon={WhatsappIcon}
-              className={styles.whatsapp}
-            >
-              Escribirle por WhatsApp
-            </Button>
-          </Card>
+          {esAdmin ? (
+            <Card title="Cliente">
+              <p className={styles.clienteNombre}>
+                <Link to={paths.cliente(cliente.id)}>{nombreCliente}</Link>
+              </p>
+              <ul className={styles.contacto}>
+                <li>
+                  <PhoneIcon className={styles.datoIcon} />
+                  <span className="visually-hidden">Teléfono: </span>
+                  <a href={buildTelUrl(cliente.telefono)}>{cliente.telefono}</a>
+                </li>
+                <li>
+                  <MailIcon className={styles.datoIcon} />
+                  <span className="visually-hidden">Email: </span>
+                  <a href={`mailto:${cliente.email}`}>{cliente.email}</a>
+                </li>
+              </ul>
+              <Button
+                href={buildWhatsAppUrl(cliente.telefono, `¡Hola, ${cliente.nombre}! Te escribimos de Carpe Eventos por tu reserva.`)}
+                external
+                variant="outline"
+                size="sm"
+                icon={WhatsappIcon}
+                className={styles.whatsapp}
+              >
+                Escribirle por WhatsApp
+              </Button>
+            </Card>
+          ) : (
+            <Card title="¿Tenés dudas?">
+              <p className={styles.nota}>
+                Escribinos por WhatsApp y te respondemos de {NEGOCIO.horarioConsultas.dias.toLowerCase()} de{" "}
+                {NEGOCIO.horarioConsultas.horas}.
+              </p>
+              <Button
+                href={buildWhatsAppUrl(NEGOCIO.whatsapp, `${MENSAJE_WHATSAPP_CONSULTA} (Reserva n.º ${evento.id})`)}
+                external
+                variant="outline"
+                size="sm"
+                icon={WhatsappIcon}
+                className={styles.whatsapp}
+              >
+                Escribir a {NEGOCIO.nombre}
+              </Button>
+            </Card>
+          )}
         </div>
 
         <aside className={styles.lateral} aria-label="Acciones del evento">
-          <Card title="Cambiar estado">
-            <EstadoActions estado={evento.estado} estadoEnProceso={estadoEnProceso} onCambiarEstado={handleCambiarEstado} />
+          <Card title={esAdmin ? "Cambiar estado" : "Tu reserva"}>
+            <EstadoActions
+              acciones={acciones}
+              estadoEnProceso={estadoEnProceso}
+              onCambiarEstado={handleCambiarEstado}
+              sinAccionesTexto="Este evento ya está cerrado y no admite más cambios de estado."
+            />
           </Card>
 
           <Card title="Modificar la reserva">
@@ -218,24 +334,22 @@ export default function EventoDetallePage() {
                   Editar datos
                 </Button>
               ) : (
-                <p className={styles.nota}>Los datos de un evento en curso, finalizado o cancelado ya no se modifican.</p>
+                <p className={styles.nota}>
+                  {evento.estado === ESTADOS.CONFIRMADO
+                    ? "Un evento confirmado ya no se modifica. Si hace falta cambiarlo, se cancela y se pide uno nuevo."
+                    : "Los datos de un evento en curso, finalizado o cancelado ya no se modifican."}
+                </p>
               )}
 
-              {puedeEliminarse(evento.estado) ? (
+              {esAdmin && puedeEliminarse(evento.estado) && (
                 <Button
                   variant="dangerGhost"
                   icon={TrashIcon}
                   fullWidth
-                  onClick={() => eliminacion.solicitar(eventoCompleto)}
+                  onClick={() => eliminacion.solicitar(evento)}
                 >
                   Eliminar evento
                 </Button>
-              ) : (
-                <p className={styles.nota}>
-                  {evento.estado === ESTADOS.CONFIRMADO
-                    ? "Un evento confirmado no se puede eliminar. Si hace falta, primero cancelalo."
-                    : "Este evento queda en el historial y no se puede eliminar."}
-                </p>
               )}
             </div>
           </Card>
@@ -244,15 +358,29 @@ export default function EventoDetallePage() {
 
       <ConfirmDialog
         open={confirmarCancelacion}
-        title="¿Cancelar este evento?"
-        confirmLabel="Sí, cancelar evento"
+        title={esAdmin ? "¿Cancelar este evento?" : "¿Cancelar tu reserva?"}
+        confirmLabel={esAdmin ? "Sí, cancelar evento" : "Sí, cancelar reserva"}
         loading={estadoEnProceso === ESTADOS.CANCELADO}
         onConfirm={() => aplicarCambioEstado(ESTADOS.CANCELADO)}
         onCancel={() => setConfirmarCancelacion(false)}
       >
         <p>
-          El evento de {nombreCliente} del {formatFechaLarga(evento.fecha).toLowerCase()} va a pasar a estado
-          Cancelado y la fecha va a quedar libre. Después no se puede volver atrás.
+          {esAdmin ? `El evento de ${nombreCliente}` : "Tu evento"} del {formatFechaLarga(evento.fecha).toLowerCase()}{" "}
+          va a pasar a estado Cancelado y la fecha va a quedar libre. Después no se puede volver atrás.
+        </p>
+      </ConfirmDialog>
+
+      <ConfirmDialog
+        open={confirmarRechazo}
+        title="¿Rechazar el presupuesto?"
+        confirmLabel="Sí, rechazar"
+        loading={accionPresupuesto === "rechazar"}
+        onConfirm={rechazar}
+        onCancel={() => setConfirmarRechazo(false)}
+      >
+        <p>
+          La reserva vuelve a estado Pendiente. Después se puede modificar (por ejemplo, la cantidad de invitados) para
+          recibir un presupuesto nuevo, o cancelar.
         </p>
       </ConfirmDialog>
 

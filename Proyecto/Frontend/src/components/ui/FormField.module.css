@@ -15,7 +15,7 @@
   color: var(--color-texto-suave);
 }
 
-/* Estilo compartido por inputs y selects (lo usan TextField y SelectField). */
+/* Estilo compartido por inputs, selects y textareas (TextField, SelectField, TextAreaField). */
 .control {
   width: 100%;
   min-height: 2.875rem;
@@ -55,6 +55,11 @@
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   background-size: 1.125rem;
+}
+
+.textarea {
+  min-height: 5.5rem;
+  resize: vertical;
 }
 
 .error {

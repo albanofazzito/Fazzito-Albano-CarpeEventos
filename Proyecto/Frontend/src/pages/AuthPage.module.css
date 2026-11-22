@@ -1,0 +1,66 @@
+/* Compartido por LoginPage y RegistroPage. */
+.contenido {
+  padding-block: var(--space-6) var(--space-8);
+}
+
+.tarjeta {
+  max-width: 30rem;
+  margin-inline: auto;
+  padding: var(--space-6);
+  background-color: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.obligatorios {
+  font-size: var(--text-sm);
+  color: var(--color-texto-suave);
+}
+
+.aviso,
+.error {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-5);
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--color-dorado);
+  border-radius: var(--radius-sm);
+  background-color: var(--color-crema-50);
+  font-size: var(--text-sm);
+  color: var(--color-texto);
+}
+
+.error {
+  margin-bottom: 0;
+  border-left-color: var(--color-error);
+  background-color: var(--color-error-fondo);
+  font-weight: 600;
+  color: var(--color-error);
+}
+
+.avisoIcon {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.alternativa {
+  margin-top: var(--space-5);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-borde);
+  text-align: center;
+  color: var(--color-texto-suave);
+}
+
+.alternativa a {
+  font-weight: 700;
+  color: var(--color-borgona);
+}
+
+@media (max-width: 480px) {
+  .tarjeta {
+    padding: var(--space-5) var(--space-4);
+  }
+}

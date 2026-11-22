@@ -39,7 +39,8 @@
 }
 
 .link,
-.panelLink {
+.panelLink,
+.salir {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -54,7 +55,8 @@
     color var(--transition);
 }
 
-.link:hover {
+.link:hover,
+.salir:hover {
   background-color: rgb(244 233 216 / 0.1);
 }
 
@@ -83,12 +85,18 @@
   color: var(--color-borgona);
 }
 
+.salir {
+  border: 0;
+  background: transparent;
+  font-size: var(--text-base);
+}
+
 .panelIcon {
   width: 1.1rem;
   height: 1.1rem;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 960px) {
   /* El <nav> queda vacío en la fila (el menú se despliega abajo): el botón va al final. */
   .toggle {
     display: grid;
@@ -116,7 +124,8 @@
   }
 
   .link,
-  .panelLink {
+  .panelLink,
+  .salir {
     width: 100%;
     padding-block: var(--space-3);
   }

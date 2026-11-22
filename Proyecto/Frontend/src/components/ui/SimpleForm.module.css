@@ -1,0 +1,31 @@
+/* Formularios cortos de una columna (cliente, servicio, login, registro). */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.fila {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+@media (max-width: 480px) {
+  .fila {
+    grid-template-columns: 1fr;
+  }
+
+  .acciones > * {
+    flex: 1 1 100%;
+  }
+}

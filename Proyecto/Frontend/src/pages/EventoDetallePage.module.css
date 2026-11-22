@@ -75,6 +75,11 @@
   color: var(--color-borgona);
 }
 
+.clienteNombre a {
+  color: inherit;
+  text-underline-offset: 0.2em;
+}
+
 .contacto {
   display: flex;
   flex-wrap: wrap;

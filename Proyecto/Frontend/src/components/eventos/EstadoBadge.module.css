@@ -38,7 +38,8 @@
   --badge-fondo: #e3e8f3;
 }
 
-.confirmado {
+.confirmado,
+.aprobado {
   --badge-texto: #22573c;
   --badge-fondo: #e1f0e7;
 }
@@ -53,7 +54,8 @@
   --badge-fondo: #ece7e3;
 }
 
-.cancelado {
+.cancelado,
+.rechazado {
   --badge-texto: #922b21;
   --badge-fondo: #f8e0de;
 }

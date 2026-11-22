@@ -1,6 +1,6 @@
-import { useId, useMemo, useRef, useState } from "react";
+import { useCallback, useId, useMemo } from "react";
 import InfoIcon from "../../assets/icons/info.svg?react";
-import { useToast } from "../../hooks/useToast.js";
+import { useFormulario } from "../../hooks/useFormulario.js";
 import { getTodayISO } from "../../utils/dates.js";
 import { formValuesToPayload } from "../../utils/eventos.js";
 import { formatNombreCompleto } from "../../utils/formatters.js";
@@ -8,80 +8,57 @@ import { validateEventoForm } from "../../utils/validators.js";
 import Button from "../ui/Button.jsx";
 import SelectField from "../ui/SelectField.jsx";
 import TextField from "../ui/TextField.jsx";
+import DisponibilidadDelDia from "./DisponibilidadDelDia.jsx";
+import EstimacionPresupuesto from "./EstimacionPresupuesto.jsx";
 import ServicioPicker from "./ServicioPicker.jsx";
 import styles from "./EventoForm.module.css";
-
-// Orden en el que aparecen los campos: se usa para enfocar el primero con error.
-const CAMPOS = ["clienteId", "cantidadInvitados", "servicioId", "fecha", "horaInicio", "horaFin"];
 
 /**
  * Formulario de Evento, compartido por "Nuevo evento" y "Editar evento".
  * Valida en el navegador con las mismas reglas que la API y recién entonces
  * llama a `onSubmit` con los datos listos para enviar. La pantalla que lo usa
  * decide qué servicio llamar y qué hacer después.
+ *
+ * - `clientes`: si se pasa, se muestra el selector de cliente (lo usa el
+ *   administrador). Un cliente reserva siempre a su nombre y no lo ve.
+ * - `capacidadMaxima`: aforo del salón, viene de /api/salon.
  */
-export default function EventoForm({ initialValues, clientes, servicios, submitLabel, onSubmit, cancelTo, nota }) {
-  const [values, setValues] = useState(initialValues);
-  const [tocados, setTocados] = useState({});
-  const [intentoEnviar, setIntentoEnviar] = useState(false);
-  const [enviando, setEnviando] = useState(false);
-  const formRef = useRef(null);
+export default function EventoForm({
+  initialValues,
+  clientes,
+  servicios,
+  capacidadMaxima,
+  submitLabel,
+  onSubmit,
+  cancelTo,
+  nota,
+}) {
   const notaId = useId();
-  const toast = useToast();
+  const eligeCliente = Boolean(clientes);
 
-  const errores = useMemo(() => validateEventoForm(values), [values]);
+  const validate = useCallback(
+    (values) => validateEventoForm(values, { requiereCliente: eligeCliente, capacidadMaxima }),
+    [eligeCliente, capacidadMaxima]
+  );
 
-  // Los errores aparecen cuando el usuario sale del campo o intenta enviar,
-  // no mientras recién empieza a escribir.
-  const errorVisible = (campo) => (tocados[campo] || intentoEnviar ? errores[campo] : undefined);
+  const { values, errores, errorVisible, handleChange, handleBlur, handleSubmit, enviando, formRef } = useFormulario({
+    initialValues,
+    validate,
+    onSubmit: (datos) => onSubmit(formValuesToPayload(datos, { incluirCliente: eligeCliente })),
+  });
 
   const opcionesClientes = useMemo(
     () =>
-      clientes.map((cliente) => ({
+      (clientes ?? []).map((cliente) => ({
         value: String(cliente.id),
         label: `${formatNombreCompleto(cliente)} · ${cliente.email}`,
       })),
     [clientes]
   );
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    setValues((actuales) => ({ ...actuales, [name]: value }));
-  }
-
-  function handleBlur(event) {
-    const { name } = event.target;
-    setTocados((actuales) => (actuales[name] ? actuales : { ...actuales, [name]: true }));
-  }
-
-  function enfocarCampo(nombre) {
-    const elemento = formRef.current?.elements.namedItem(nombre);
-    // Los radio buttons llegan como RadioNodeList: se enfoca el primero.
-    const destino = elemento instanceof RadioNodeList ? elemento[0] : elemento;
-    destino?.focus();
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setIntentoEnviar(true);
-
-    const camposConError = CAMPOS.filter((campo) => errores[campo]);
-    if (camposConError.length > 0) {
-      enfocarCampo(camposConError[0]);
-      toast.error(
-        "Revisá los datos del formulario",
-        camposConError.length === 1 ? "Hay un campo con error." : `Hay ${camposConError.length} campos con errores.`
-      );
-      return;
-    }
-
-    setEnviando(true);
-    try {
-      await onSubmit(formValuesToPayload(values));
-    } finally {
-      setEnviando(false);
-    }
-  }
+  // Ayudas en vivo: solo se consultan cuando los datos que necesitan son válidos.
+  const fechaValida = Boolean(values.fecha) && !errores.fecha;
+  const puedeEstimar = Boolean(values.servicioId && values.cantidadInvitados) && !errores.cantidadInvitados;
 
   return (
     <form ref={formRef} className={styles.form} noValidate onSubmit={handleSubmit} aria-describedby={notaId}>
@@ -89,26 +66,29 @@ export default function EventoForm({ initialValues, clientes, servicios, submitL
         Todos los campos son obligatorios.
       </p>
 
-      <div className={styles.fila}>
-        <SelectField
-          label="Cliente"
-          hint="Quién hace la reserva."
-          name="clienteId"
-          value={values.clienteId}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          error={errorVisible("clienteId")}
-          options={opcionesClientes}
-          placeholder="Elegí un cliente"
-          required
-        />
+      <div className={eligeCliente ? styles.fila : styles.filaSimple}>
+        {eligeCliente && (
+          <SelectField
+            label="Cliente"
+            hint="Quién hace la reserva."
+            name="clienteId"
+            value={values.clienteId}
+            onChange={handleChange}
+            onBlur={handleBlur}
+            error={errorVisible("clienteId")}
+            options={opcionesClientes}
+            placeholder="Elegí un cliente"
+            required
+          />
+        )}
         <TextField
           label="Cantidad de invitados"
-          hint="Contando adultos y chicos."
+          hint={capacidadMaxima ? `Contando adultos y chicos. Máximo ${capacidadMaxima}.` : "Contando adultos y chicos."}
           type="number"
           name="cantidadInvitados"
           inputMode="numeric"
           min="1"
+          max={capacidadMaxima}
           step="1"
           value={values.cantidadInvitados}
           onChange={handleChange}
@@ -163,7 +143,14 @@ export default function EventoForm({ initialValues, clientes, servicios, submitL
             required
           />
         </div>
+        {fechaValida && (
+          <DisponibilidadDelDia fecha={values.fecha} horaInicio={values.horaInicio} horaFin={values.horaFin} />
+        )}
       </fieldset>
+
+      {puedeEstimar && (
+        <EstimacionPresupuesto servicioId={values.servicioId} cantidadInvitados={values.cantidadInvitados} />
+      )}
 
       {nota && (
         <aside className={styles.nota}>

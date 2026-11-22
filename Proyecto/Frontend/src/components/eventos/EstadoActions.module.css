@@ -11,6 +11,11 @@
   color: var(--color-texto-suave);
 }
 
+.bloqueo {
+  font-weight: 600;
+  color: var(--color-texto);
+}
+
 .vacio {
   color: var(--color-texto-suave);
 }

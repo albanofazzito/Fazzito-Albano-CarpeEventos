@@ -17,8 +17,8 @@ export default function NotFoundPage() {
           action={
             <>
               <Button to={paths.home}>Ir al inicio</Button>
-              <Button to={paths.eventos} variant="outline">
-                Ver eventos
+              <Button to={paths.disponibilidad} variant="outline">
+                Ver fechas libres
               </Button>
             </>
           }

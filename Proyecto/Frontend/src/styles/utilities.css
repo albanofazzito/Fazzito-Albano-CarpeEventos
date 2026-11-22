@@ -42,3 +42,26 @@
 .skip-link:focus {
   transform: none;
 }
+
+/*
+ * Imprimir o "guardar como PDF" un presupuesto: si la página tiene un
+ * elemento .area-impresion, se ocultan todos los bloques que no lo contienen
+ * y sus contenedores pasan a ocupar el ancho completo de la hoja.
+ */
+@media print {
+  body:has(.area-impresion) *:has(.area-impresion) {
+    display: block;
+    position: static;
+    margin: 0;
+    padding: 0;
+  }
+
+  body:has(.area-impresion) *:has(.area-impresion) > :not(.area-impresion, :has(.area-impresion)) {
+    display: none;
+  }
+
+  .area-impresion {
+    border: 0;
+    box-shadow: none;
+  }
+}
