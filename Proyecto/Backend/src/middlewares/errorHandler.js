@@ -19,6 +19,15 @@ export function errorHandler(err, req, res, next) {
     return ApiResponse.error(res, err.message, err.statusCode);
   }
 
+  // express.json() no pudo leer el cuerpo: es un error del cliente (400),
+  // no del servidor. Pasa, por ejemplo, con un JSON mal escrito.
+  if (err.type === "entity.parse.failed") {
+    return ApiResponse.error(res, Messages.INVALID_JSON, 400);
+  }
+  if (err.type && err.status >= 400 && err.status < 500) {
+    return ApiResponse.error(res, Messages.INVALID_DATA, err.status);
+  }
+
   // Error inesperado (no operacional): se loguea completo en el servidor
   // pero nunca se expone el detalle interno al cliente de la API.
   console.error("[ERROR NO CONTROLADO]", err);

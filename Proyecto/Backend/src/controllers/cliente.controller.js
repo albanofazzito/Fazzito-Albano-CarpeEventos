@@ -5,9 +5,8 @@ import { parseId } from "../utils/parseId.js";
 
 /**
  * cliente.controller.js
- * Endpoints de solo lectura. El CRUD completo evaluado en esta entrega
- * está en EventoController; estos endpoints existen para poder consultar
- * qué clientes están disponibles al crear un Evento.
+ * CRUD de Cliente. Qué puede hacer cada rol lo deciden las rutas
+ * (authorize) y el servicio (un cliente solo accede a sus datos).
  */
 export const ClienteController = {
   getAll: asyncHandler(async (req, res) => {
@@ -17,8 +16,25 @@ export const ClienteController = {
 
   getById: asyncHandler(async (req, res) => {
     const id = parseId(req.params.id);
-    const cliente = ClienteService.getById(id);
+    const cliente = ClienteService.getById(id, req.usuario);
     return ApiResponse.success(res, cliente);
+  }),
+
+  create: asyncHandler(async (req, res) => {
+    const cliente = ClienteService.create(req.body);
+    return ApiResponse.success(res, cliente, 201);
+  }),
+
+  update: asyncHandler(async (req, res) => {
+    const id = parseId(req.params.id);
+    const cliente = ClienteService.update(id, req.body, req.usuario);
+    return ApiResponse.success(res, cliente);
+  }),
+
+  remove: asyncHandler(async (req, res) => {
+    const id = parseId(req.params.id);
+    ClienteService.remove(id);
+    return ApiResponse.success(res, { id });
   }),
 };
 

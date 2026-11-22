@@ -24,6 +24,20 @@ export class BadRequestError extends AppError {
   }
 }
 
+/** 401 — falta iniciar sesión, o el token es inválido o venció. */
+export class UnauthorizedError extends AppError {
+  constructor(message) {
+    super(message, 401);
+  }
+}
+
+/** 403 — el usuario está identificado pero no tiene permiso para la acción. */
+export class ForbiddenError extends AppError {
+  constructor(message) {
+    super(message, 403);
+  }
+}
+
 /** 404 — el recurso solicitado no existe. */
 export class NotFoundError extends AppError {
   constructor(message) {

@@ -1,23 +1,15 @@
 import Cliente from "../models/Cliente.js";
 import { createIdGenerator } from "../utils/idGenerator.js";
+import { onlyDigits } from "../utils/validators.js";
 
 /**
  * cliente.repository.js
  * Única responsabilidad: guardar/leer Clientes de un array en memoria.
  * No valida datos ni conoce reglas de negocio — eso es responsabilidad de
- * la capa de servicios.
+ * la capa de servicios. Los datos de prueba se cargan desde data/seed.js.
  */
 const clientes = [];
 const nextId = createIdGenerator(1);
-
-function seed() {
-  clientes.push(
-    new Cliente({ id: nextId(), nombre: "Marina", apellido: "Gómez", telefono: "+54 9 11 5555-0101", email: "marina.gomez@example.com" }),
-    new Cliente({ id: nextId(), nombre: "Diego", apellido: "Fernández", telefono: "+54 9 11 5555-0102", email: "diego.fernandez@example.com" }),
-    new Cliente({ id: nextId(), nombre: "Lucía", apellido: "Álvarez", telefono: "+54 9 11 5555-0103", email: "lucia.alvarez@example.com" })
-  );
-}
-seed();
 
 export const ClienteRepository = {
   findAll() {
@@ -28,10 +20,20 @@ export const ClienteRepository = {
     return clientes.find((c) => c.id === id) ?? null;
   },
 
-  findByEmailOrTelefono(email, telefono) {
+  /**
+   * Busca otro cliente con el mismo email (sin distinguir mayúsculas) o el
+   * mismo teléfono (comparando solo los dígitos, así "11 5555-0101" y
+   * "1155550101" cuentan como el mismo número).
+   */
+  findByEmailOrTelefono(email, telefono, excludeId) {
+    const emailBuscado = String(email).trim().toLowerCase();
+    const telefonoBuscado = onlyDigits(telefono);
+
     return (
       clientes.find(
-        (c) => c.email.toLowerCase() === String(email).toLowerCase() || c.telefono === telefono
+        (c) =>
+          c.id !== excludeId &&
+          (c.email.toLowerCase() === emailBuscado || onlyDigits(c.telefono) === telefonoBuscado)
       ) ?? null
     );
   },
@@ -40,6 +42,20 @@ export const ClienteRepository = {
     const cliente = new Cliente({ id: nextId(), ...data });
     clientes.push(cliente);
     return cliente;
+  },
+
+  update(id, changes) {
+    const index = clientes.findIndex((c) => c.id === id);
+    if (index === -1) return null;
+    clientes[index] = new Cliente({ ...clientes[index], ...changes });
+    return clientes[index];
+  },
+
+  delete(id) {
+    const index = clientes.findIndex((c) => c.id === id);
+    if (index === -1) return false;
+    clientes.splice(index, 1);
+    return true;
   },
 };
 

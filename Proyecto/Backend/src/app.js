@@ -8,7 +8,7 @@ import { errorHandler } from "./middlewares/errorHandler.js";
  * app.js
  * Configuración de la aplicación Express. El orden es importante:
  *   1) middlewares globales (CORS y parseo de body)
- *   2) rutas de la API
+ *   2) rutas de la API (cada una aplica sus middlewares de autenticación)
  *   3) notFoundRoute (cualquier ruta no matcheada hasta acá)
  *   4) errorHandler (SIEMPRE al final: es el manejo centralizado de errores)
  */

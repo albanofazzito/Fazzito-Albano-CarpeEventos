@@ -8,29 +8,35 @@ import { createIdGenerator } from "../utils/idGenerator.js";
 const servicios = [];
 const nextId = createIdGenerator(1);
 
-function seed() {
-  servicios.push(
-    new Servicio({ id: nextId(), nombre: "Cumpleaños infantil", descripcion: "Alquiler de salón con animación incluida", precio: 350000, categoria: "Cumpleaños" }),
-    new Servicio({ id: nextId(), nombre: "Boda / Casamiento", descripcion: "Espacio para celebraciones nupciales", precio: 900000, categoria: "Bodas" }),
-    new Servicio({ id: nextId(), nombre: "Bautismo / Comunión", descripcion: "Evento religioso y familiar", precio: 280000, categoria: "Bautismos y comuniones" }),
-    new Servicio({ id: nextId(), nombre: "Servicio integral", descripcion: "Animación, catering, DJ y decoración temática", precio: 550000, categoria: "Integral" })
-  );
-}
-seed();
-
 export const ServicioRepository = {
   findAll() {
     return [...servicios];
+  },
+
+  findActivos() {
+    return servicios.filter((s) => s.activo);
   },
 
   findById(id) {
     return servicios.find((s) => s.id === id) ?? null;
   },
 
+  findByNombre(nombre, excludeId) {
+    const buscado = String(nombre).trim().toLowerCase();
+    return servicios.find((s) => s.id !== excludeId && s.nombre.toLowerCase() === buscado) ?? null;
+  },
+
   create(data) {
     const servicio = new Servicio({ id: nextId(), ...data });
     servicios.push(servicio);
     return servicio;
+  },
+
+  update(id, changes) {
+    const index = servicios.findIndex((s) => s.id === id);
+    if (index === -1) return null;
+    servicios[index] = new Servicio({ ...servicios[index], ...changes });
+    return servicios[index];
   },
 };
 

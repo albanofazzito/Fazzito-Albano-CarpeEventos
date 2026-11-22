@@ -11,7 +11,7 @@ import { Messages } from "../enums/Messages.js";
 export function parseId(rawId) {
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) {
-    throw new BadRequestError(Messages.INVALID_DATA);
+    throw new BadRequestError(Messages.INVALID_ID);
   }
   return id;
 }
